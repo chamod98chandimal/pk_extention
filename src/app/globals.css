@@ -1,0 +1,19 @@
+/* Reset some default styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  padding: 2rem;
+  padding-bottom: 4rem; /* Add space for fixed footer */
+}
+
+main {
+  max-width: 600px;
+  margin: 0 auto;
+}

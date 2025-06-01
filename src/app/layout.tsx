@@ -16,11 +16,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <LoadingProvider>
           <AuthProvider>
-            <Navbar />
+            {/* <Navbar /> */}
             <GlobalLoadingWrapper>
               {children}
             </GlobalLoadingWrapper>
-            <Footer />
+            {/* <Footer /> */}
           </AuthProvider>
         </LoadingProvider>
       </body>

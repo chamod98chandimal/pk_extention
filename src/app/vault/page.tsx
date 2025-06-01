@@ -131,7 +131,7 @@ function VaultContent() {
         }
       `}</style>
       <main style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '1.5rem', color: '#c9d1d9' }}>Paaskeeper Vault</h1>
+        {/* <h1 style={{ marginBottom: '1.5rem', color: '#c9d1d9' }}>Paaskeeper Vault</h1> */}
       <p style={{ marginBottom: '2rem', color: '#8b949e' }}><strong>Logged in as:</strong> <span style={{ color: '#58a6ff' }}>{wallet}</span></p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

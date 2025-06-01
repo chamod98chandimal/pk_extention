@@ -163,14 +163,14 @@ function PasswordVerification({ onVerified }: { onVerified: () => void }) {
           >
             Unlock
           </button>
-          <p style={{ 
+          {/* <p style={{ 
             marginTop: '1rem', 
             fontSize: '0.9rem', 
             color: '#8b949e', 
             textAlign: 'center' 
           }}>
             If you don't set the password yet, go settings and set password please
-          </p>
+          </p> */}
         </form>
       </div>
     </>

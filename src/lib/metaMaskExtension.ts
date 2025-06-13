@@ -37,9 +37,11 @@ export class MetaMaskExtensionManager {
   }
 
   private initializeEventListeners() {
-    if (this.isMetaMaskAvailable()) {
+    if (this.isMetaMaskAvailable() && window.ethereum && typeof window.ethereum.on === 'function') {
+      const ethereum = window.ethereum;
+      
       // Listen for account changes
-      window.ethereum!.on('accountsChanged', (accounts: string[]) => {
+      ethereum.on('accountsChanged', (accounts: string[]) => {
         console.log('MetaMask accounts changed:', accounts);
         this.currentAccounts = accounts;
         this.emit('accountsChanged', accounts);
@@ -51,7 +53,7 @@ export class MetaMaskExtensionManager {
       });
 
       // Listen for chain changes
-      window.ethereum!.on('chainChanged', (chainId: string) => {
+      ethereum.on('chainChanged', (chainId: string) => {
         console.log('MetaMask chain changed:', chainId);
         this.currentChainId = chainId;
         this.emit('chainChanged', chainId);
@@ -66,13 +68,13 @@ export class MetaMaskExtensionManager {
       });
 
       // Listen for connection
-      window.ethereum!.on('connect', (connectInfo: any) => {
+      ethereum.on('connect', (connectInfo: any) => {
         console.log('MetaMask connected:', connectInfo);
         this.emit('connected', connectInfo);
       });
 
       // Listen for disconnection
-      window.ethereum!.on('disconnect', (error: any) => {
+      ethereum.on('disconnect', (error: any) => {
         console.log('MetaMask disconnected:', error);
         this.currentAccounts = [];
         this.currentChainId = null;
@@ -128,9 +130,9 @@ export class MetaMaskExtensionManager {
     }
 
     try {
-      const accounts = await window.ethereum!.request({ method: 'eth_accounts' });
-      const chainId = await window.ethereum!.request({ method: 'eth_chainId' });
-      const networkVersion = await window.ethereum!.request({ method: 'net_version' });
+      const accounts = await window.ethereum!.request({ method: 'eth_accounts' }) as string[];
+      const chainId = await window.ethereum!.request({ method: 'eth_chainId' }) as string;
+      const networkVersion = await window.ethereum!.request({ method: 'net_version' }) as string;
 
       this.currentAccounts = accounts;
       this.currentChainId = chainId;
@@ -168,14 +170,14 @@ export class MetaMaskExtensionManager {
       // Request account access
       const accounts = await window.ethereum!.request({ 
         method: 'eth_requestAccounts' 
-      });
+      }) as string[];
 
       if (accounts.length === 0) {
         throw new Error('No accounts available. Please unlock MetaMask and try again.');
       }
 
       // Get chain info
-      const chainId = await window.ethereum!.request({ method: 'eth_chainId' });
+      const chainId = await window.ethereum!.request({ method: 'eth_chainId' }) as string;
       
       this.currentAccounts = accounts;
       this.currentChainId = chainId;
@@ -277,7 +279,7 @@ export class MetaMaskExtensionManager {
       const signature = await window.ethereum!.request({
         method: 'personal_sign',
         params: [message, accountToUse]
-      });
+      }) as string;
 
       return signature;
     } catch (error: any) {
@@ -349,8 +351,8 @@ export class MetaMaskExtensionManager {
   // Extension-specific: Check if running in extension context
   isExtensionContext(): boolean {
     return typeof chrome !== 'undefined' && 
-           chrome.runtime && 
-           chrome.runtime.id;
+           !!chrome.runtime && 
+           !!chrome.runtime.id;
   }
 
   // Extension-specific: Send message to background script
@@ -361,9 +363,13 @@ export class MetaMaskExtensionManager {
     }
 
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage(message, (response) => {
-        resolve(response);
-      });
+      if (chrome && chrome.runtime) {
+        chrome.runtime.sendMessage(message, (response) => {
+          resolve(response);
+        });
+      } else {
+        resolve(null);
+      }
     });
   }
 

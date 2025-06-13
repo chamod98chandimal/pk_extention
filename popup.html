@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paaskeeper - Decentralized Password Manager</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            width: 400px;
+            min-height: 500px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .container {
+            padding: 20px;
+            height: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .status-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-label {
+            font-weight: 500;
+        }
+        
+        .status-value {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-connected {
+            background: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+        
+        .status-disconnected {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .status-warning {
+            background: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .actions {
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+        }
+        
+        .btn-primary:hover {
+            background: white;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-btn {
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .quick-btn-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .account-display {
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+        
+        .network-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .network-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+        
+        .network-dot.wrong {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔐</div>
+            <div class="title">Paaskeeper</div>
+            <div class="subtitle">Decentralized Password Manager</div>
+        </div>
+        
+        <div id="loadingSection" class="loading">
+            <div class="spinner"></div>
+            <div>Checking MetaMask...</div>
+        </div>
+        
+        <div id="mainContent" class="hidden">
+            <div class="status-section">
+                <div class="status-item">
+                    <span class="status-label">MetaMask</span>
+                    <span id="metamaskStatus" class="status-value status-disconnected">Not Connected</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Network</span>
+                    <span id="networkStatus" class="status-value">
+                        <span class="network-indicator">
+                            <span id="networkDot" class="network-dot wrong"></span>
+                            <span id="networkName">Unknown</span>
+                        </span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Account</span>
+                    <span id="accountStatus" class="status-value account-display">Not Connected</span>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="connectBtn" class="btn btn-primary">🦊 Connect MetaMask</button>
+                <button id="switchNetworkBtn" class="btn btn-secondary hidden">🔄 Switch to Sepolia</button>
+            </div>
+            
+            <div id="quickActions" class="quick-actions hidden">
+                <button id="openVaultBtn" class="quick-btn">
+                    <span class="quick-btn-icon">🏦</span>
+                    Open Vault
+                </button>
+                <button id="addPasswordBtn" class="quick-btn">
+                    <span class="quick-btn-icon">➕</span>
+                    Add Password
+                </button>
+                <button id="settingsBtn" class="quick-btn">
+                    <span class="quick-btn-icon">⚙️</span>
+                    Settings
+                </button>
+                <button id="helpBtn" class="quick-btn">
+                    <span class="quick-btn-icon">❓</span>
+                    Help
+                </button>
+            </div>
+            
+            <div id="errorMessage" class="status-section hidden" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3);">
+                <div id="errorText"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>Paaskeeper v0.2 Beta</div>
+            <div>Powered by Ethereum & Lit Protocol</div>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html> 
